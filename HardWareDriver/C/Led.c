@@ -44,21 +44,18 @@ Led4-->PB3
 ********************************************/
 void LedInit(void)
 {
-    RCC->APB2ENR|=1<<2;    //使能PORTA时钟	
-    RCC->APB2ENR|=1<<3;    //使能PORTB时钟	
-
-    RCC->APB2ENR|=1<<0;      //使能复用时钟	   
-    GPIOB->CRL&=0XFFFF0F0F;  //PB1,3推挽输出
-    GPIOB->CRL|=0X00003030;
-    GPIOB->ODR|=5<<1;        //PB1,3上拉
-  
-    GPIOA->CRH&=0XFFFF0FF0;  //PA8,11推挽输出
-    GPIOA->CRH|=0X00003003;
-    GPIOA->ODR|=9<<0;        //PA1,11上拉
-  
-    AFIO->MAPR|=2<<24;      //关闭JATG,千万不能将SWD也关闭，否则芯片作废，亲测!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    LedA_off;LedB_off;LedC_off;LedD_off;
-  //  printf("状态LED灯初始化完成...\r\n");
+				GPIO_InitTypeDef GPIO_InitStructure;
+	
+				RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB| RCC_APB2Periph_AFIO,ENABLE);
+        GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+				//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+      
+				GPIO_InitStructure.GPIO_Pin =GPIO_Pin_3;
+				GPIO_InitStructure.GPIO_Mode =GPIO_Mode_Out_PP;
+				GPIO_InitStructure.GPIO_Speed =GPIO_Speed_50MHz;
+				GPIO_Init(GPIOB, &GPIO_InitStructure);
+				GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+				printf("LED init done...\r\n");
 }
 
 //底层更新 ，10Hz

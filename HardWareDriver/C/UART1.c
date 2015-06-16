@@ -128,8 +128,8 @@ void UART1_init(u32 pclk2,u32 bound)
   UartRxbuf.pbuf = &rx_buffer[0];
   
   
-  printf("系统时钟频率：%dMHz \r\n",pclk2);
-  printf("串口1初始化波特率：%d \r\n",bound);
+  printf("SYSTEM Frequence is %dMHz \r\n",pclk2);
+  printf("Series 1 set to %d Hz\r\n",bound);
  
   
 }

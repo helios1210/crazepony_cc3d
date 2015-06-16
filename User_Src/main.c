@@ -30,12 +30,16 @@
 #include "IMUSO3.h"
 #include "control.h"
 #include "FailSafe.h"
+//zhangxch add MPU6000 driver
+#include "MPU6000.h"
  
 //sw counter
 uint16_t  batCnt; 
 //check executing time and period in different loop
 uint32_t startTime[5],execTime[5];
 uint32_t realExecPrd[5];	//us , real called period in different loop
+gyro_t *gyro_test;
+acc_t *acc_test;
  
 /********************************************
               飞控主函数入口
@@ -55,39 +59,53 @@ int main(void)
 	
   NVIC_INIT();	                //中断初始化
 
-  STMFLASH_Unlock();            //内部flash解锁
+  //STMFLASH_Unlock();            //内部flash解锁
 
-  LoadParamsFromEEPROM();
+  //LoadParamsFromEEPROM();
 
   LedInit();	                //IO初始化
-
-  BT_PowerInit();               //蓝牙电源初始化完成，默认关闭
+  MPU6000_CS_init();
+	SPIIinit();
+  //BT_PowerInit();               //蓝牙电源初始化完成，默认关闭
   MotorInit();	                //马达初始化
-  BatteryCheckInit();           //电池电压监测初始化
-  IIC_Init();                   //IIC初始化
+	MotorPwmFlash(10,10,10,10);
+  //BatteryCheckInit();           //电池电压监测初始化
+  //IIC_Init();                   //IIC初始化
 	
 	#ifdef IMU_SW										//使用软件解算
-	MPU6050_initialize();
+	//MPU6050_initialize();
 	#else
-  MPU6050_DMP_Initialize();     //初始化DMP引擎
+  //MPU6050_DMP_Initialize();     //初始化DMP引擎
 	#endif
 	
   //HMC5883L_SetUp();           //初始化磁力计HMC5883L
 
-  NRF24L01_INIT();              //NRF24L01初始化
-  SetRX_Mode();                 //设无线模块为接收模式
+  //NRF24L01_INIT();              //NRF24L01初始化
+  //SetRX_Mode();                 //设无线模块为接收模式
   
-	NRFmatching();								//NRF24L01对频
+	//NRFmatching();								//NRF24L01对频
 	
-  PowerOn();                    //开机等待
-  BT_ATcmdWrite();              //蓝牙写配置
+  PowerOn();   //开机等待
+  printf("Entering while loop......");
+  while(1)
+  {
+	  //test MPU6000
+	  //GPIO_ResetBits(GPIOA,GPIO_Pin_4);
+	  //Delay(3600000);
+	  //GPIO_SetBits(GPIOA,GPIO_Pin_4);
+	  mpu6000SpiAccDetect(acc_test);
+	  //if(!mpu6000SpiGyroDetect(gyro_test)){
+		//printf(" while mpu6000SpiGyroDetect done");
+		//} 
+  }
+  //BT_ATcmdWrite();              //蓝牙写配置
  
-	BatteryCheck();
+	//BatteryCheck();
 
-	MS5611_Init();
+	//MS5611_Init();
 
-	IMU_Init();			// sample rate and cutoff freq.  sample rate is too low now due to using dmp.
-
+	//IMU_Init();			// sample rate and cutoff freq.  sample rate is too low now due to using dmp.
+#if 0
 #ifdef UART_DEBUG
 	//定时器3初始化，串口调试信息输出
 	TIM3_Init(SysClock,2000);
@@ -249,5 +267,6 @@ int main(void)
 		}
 #endif
   }//end of while(1)
+	#endif
 }
 
